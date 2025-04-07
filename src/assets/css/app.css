@@ -1,0 +1,40 @@
+body {
+  display: flex;
+  justify-content: center;
+
+  background: rgb(242, 242, 242);
+}
+
+.card {
+  border: 1px solid #000;
+  background: rgb(242, 242, 242);
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(4, 100px);
+  grid-template-rows: repeat(4, 100px);
+  grid-column-gap: 1px;
+  grid-row-gap: 1px;
+
+  justify-content: center;
+  background: #000;
+  padding: 2px;
+  border-radius: 8px;
+}
+
+.card:nth-child(1) {
+  border-radius: 8px 0 0 0;
+}
+
+.card:nth-child(4) {
+  border-radius: 0 8px 0 0;
+}
+
+.card:nth-child(13) {
+  border-radius: 0 0 0 8px;
+}
+
+.card:nth-child(16) {
+  border-radius: 0 0 8px 0;
+}

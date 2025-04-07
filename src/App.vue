@@ -1,23 +1,22 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
+import Card from './components/Card.vue'
+
+const cardList = []
+
+for (let index = 0; index < 16; index++) {
+  cardList.push(index)
+}
 </script>
 
 <template>
-  <header>
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
+  <h1>Memaze</h1>
 
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
-    </div>
-  </header>
-
-  <RouterView />
+  <section class="board">
+    <Card v-for="(card, index) in cardList" :key="`card-${index}`" :value="card" />
+  </section>
 </template>
 
-<style scoped>
+<style>
 #nav {
   display: none;
 }
