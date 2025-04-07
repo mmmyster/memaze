@@ -5,11 +5,6 @@ body {
   background: rgb(242, 242, 242);
 }
 
-.card {
-  border: 1px solid #000;
-  background: rgb(242, 242, 242);
-}
-
 .board {
   display: grid;
   grid-template-columns: repeat(4, 100px);
