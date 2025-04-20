@@ -1,11 +1,17 @@
 <script setup>
+import { computed } from 'vue'
+
 const props = defineProps({
+  matched: {
+    type: Boolean,
+    default: false,
+  },
   position: {
     type: Number,
     required: true,
   },
   value: {
-    type: Number,
+    type: String,
     required: true,
   },
   visible: {
@@ -16,42 +22,32 @@ const props = defineProps({
 
 const emit = defineEmits(['pick-card'])
 
+const flippedStyles = computed(() => {
+  if (props.visible && !props.matched) {
+    return 'is-flipped'
+  }
+
+  if (props.matched) {
+    return 'is-matched'
+  }
+  return null
+})
+
 const pickCard = () => {
   emit('pick-card', {
     position: props.position,
+    faceValue: props.value,
   })
 }
 </script>
 
 <template>
-  <div class="card" @click="pickCard">
-    <div v-if="visible" class="card-face face-up">
-      {{ value }}
+  <div class="card" :class="flippedStyles" @click="pickCard">
+    <div class="card-face face-up">
+      <img :src="`./img/${value}.webp`" :alt="`${value}`" />
     </div>
-    <div v-else class="card-face face-down">down</div>
+    <div class="card-face face-down"></div>
   </div>
 </template>
 
-<style>
-.card {
-  border: 1px solid #000;
-  background: rgb(242, 242, 242);
-  position: relative;
-}
-
-.card-face {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-}
-
-.card-face.face-up {
-  background: #e64134;
-  color: #fff;
-}
-
-.card-face.face-down {
-  background: #3b9ae1;
-  color: #fff;
-}
-</style>
+<style></style>
