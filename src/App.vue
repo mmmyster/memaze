@@ -1,147 +1,117 @@
 <script setup>
-import _ from 'lodash'
-import { computed, ref, watch } from 'vue'
+import { ref } from 'vue'
 import { launchConfetti } from './utilities/confetti'
-import Card from './components/Card.vue'
+import Tile from './components/Tile.vue'
 
-const cardList = ref([])
-const userSelection = ref([])
-const newPlayer = ref(true)
-
-const startGame = () => {
-  newPlayer.value = false
-
-  restart()
-}
-
-const status = computed(() => {
-  if (remainingPairs.value === 0) {
-    return 'player wins!!!'
-  } else {
-    return `remaining pairs: ${remainingPairs.value}`
-  }
-})
-
-const remainingPairs = computed(() => {
-  const remainingCards = cardList.value.filter((card) => card.matched === false).length
-
-  return remainingCards / 2
-})
-
-const restart = () => {
-  cardList.value = _.shuffle(cardList.value)
-
-  cardList.value = cardList.value.map((card, index) => {
-    return { ...card, matched: false, position: index, visible: false }
-  })
-}
-
-const cardItems = [
-  'astra',
-  'commodore_red',
-  'goracy_brew',
-  'pale_aged_vodka',
-  'potent_pilsner',
-  'pyrholidon',
-  'speed_bottle',
-  'speed_preptide',
+const boardLayout = [
+  ['start', 'correct', 'wrong', 'wrong'],
+  ['wrong', 'correct', 'wrong', 'wrong'],
+  ['wrong', 'correct', 'correct', 'wrong'],
+  ['wrong', 'wrong', 'correct', 'end'],
 ]
 
-cardItems.forEach((item) => {
-  cardList.value.push({
-    matched: false,
-    position: null,
-    value: item,
-    variant: 1,
-    visible: false,
-  })
+const rows = boardLayout.length
+const cols = boardLayout[0].length
 
-  cardList.value.push({
-    matched: false,
-    position: null,
-    value: item,
-    variant: 2,
-    visible: false,
-  })
-})
+const tileList = ref([])
+const currentTile = ref({ row: 0, col: 0 })
+const stepsRemaining = ref(0)
+const stepsAll = ref(0)
 
-cardList.value = cardList.value.map((card, index) => {
-  return {
-    ...card,
-    position: index,
-  }
-})
-
-const flipCard = (payload) => {
-  cardList.value[payload.position].visible = true
-
-  if (userSelection.value[0]) {
-    if (
-      (userSelection.value[0].position === payload.position && userSelection.value[0].faceValue) ===
-      payload.faceValue
-    ) {
-      return
-    } else {
-      userSelection.value[1] = payload
-    }
-  } else {
-    userSelection.value[0] = payload
-  }
+const startGame = () => {
+  drawBoard()
+  stepsRemaining.value = 0
+  currentTile.value = findTileByType('start')
 }
 
-watch(remainingPairs, (currentValue) => {
-  if (currentValue === 0) {
-    launchConfetti()
-  }
-})
+const rollDice = () => {
+  stepsRemaining.value = Math.floor(Math.random() * 4) + 1
+  stepsAll.value += stepsRemaining.value
+}
 
-watch(
-  userSelection,
-  (currentValue) => {
-    if (currentValue.length === 2) {
-      const firstCard = currentValue[0]
-      const secondCard = currentValue[1]
+const drawBoard = () => {
+  const tempList = []
 
-      if (firstCard.faceValue === secondCard.faceValue) {
-        setTimeout(() => {
-          cardList.value[firstCard.position].matched = true
-          cardList.value[secondCard.position].matched = true
-        }, 250)
-      } else {
-        setTimeout(() => {
-          cardList.value[firstCard.position].visible = false
-          cardList.value[secondCard.position].visible = false
-        }, 250)
-      }
-
-      userSelection.value.length = 0
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const type = boardLayout[row][col]
+      tempList.push({
+        position: { row, col },
+        type,
+        value: `${type}-${row}-${col}`,
+        visible: false,
+      })
     }
-  },
-  { deep: true },
-)
+  }
+
+  tileList.value = tempList
+}
+
+const findTileByType = (type) => {
+  return tileList.value.find((tile) => tile.type === type)?.position || { row: 0, col: 0 }
+}
+
+const isAdjacent = (tile) => {
+  const currentRow = currentTile.value.row
+  const currentCol = currentTile.value.col
+  const tileRow = tile.position.row
+  const tileCol = tile.position.col
+
+  return (
+    (tileRow === currentRow && Math.abs(tileCol - currentCol) === 1) ||
+    (tileCol === currentCol && Math.abs(tileRow - currentRow) === 1)
+  )
+}
+
+const flipTile = (payload) => {
+  const index = tileList.value.findIndex(
+    (tile) =>
+      tile.position.row === payload.position.row && tile.position.col === payload.position.col,
+  )
+
+  if (index === -1 || tileList.value[index].visible || stepsRemaining.value <= 0) return
+
+  const tile = tileList.value[index]
+
+  if (!isAdjacent(tile)) return
+
+  tile.visible = true
+
+  if (tile.type === 'correct') {
+    currentTile.value = { ...tile.position }
+    stepsRemaining.value -= 1
+  } else if (tile.type === 'end') {
+    currentTile.value = { ...tile.position }
+    stepsAll.value -= stepsRemaining.value - 1
+    stepsRemaining.value = 0
+    launchConfetti()
+  } else {
+    stepsRemaining.value = 0
+  }
+}
 </script>
 
 <template>
-  <h1>Strasaso</h1>
+  <main>
+    <button @click="startGame">Start Game</button>
+    <button @click="rollDice" :disabled="stepsRemaining > 0">🎲 Roll Dice</button>
+    <p>Steps left: {{ stepsRemaining }}</p>
+    <p>All steps: {{ stepsAll }}</p>
 
-  <transition-group name="card" tag="section" class="board">
-    <Card
-      v-for="card in cardList"
-      :key="`${card.value}-${card.variant}`"
-      :matched="card.matched"
-      :position="card.position"
-      :value="card.value"
-      :visible="card.visible"
-      @pick-card="flipCard"
-    />
-  </transition-group>
-  <h2>{{ status }}</h2>
-  <button v-if="newPlayer" @click="startGame">start</button>
-  <button v-else @click="restart">restart</button>
+    <section class="board">
+      <Tile
+        v-for="tile in tileList"
+        :key="tile.value"
+        :value="tile.value"
+        :type="tile.type"
+        :visible="tile.visible"
+        :current-tile="
+          tile.position.row === currentTile.row && tile.position.col === currentTile.col
+        "
+        @pick-tile="flipTile(tile)"
+      />
+    </section>
+  </main>
 </template>
 
-<style>
-#nav {
-  display: none;
-}
-</style>
+<style scoped></style>
