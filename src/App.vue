@@ -1,20 +1,13 @@
 <script setup>
 import { ref } from 'vue'
-import { launchConfetti } from './utilities/confetti'
-import Tile from './components/Tile.vue'
+import { data } from '@/data'
+import { launchConfetti } from '@/utilities/confetti'
+import Tile from '@/components/Tile.vue'
 
-const boardLayout = [
-  ['start', 'correct', 'wrong', 'wrong'],
-  ['wrong', 'correct', 'wrong', 'wrong'],
-  ['wrong', 'correct', 'correct', 'wrong'],
-  ['wrong', 'wrong', 'correct', 'end'],
-]
-
-const rows = boardLayout.length
-const cols = boardLayout[0].length
-
-const tileList = ref([])
-const currentTile = ref({ row: 0, col: 0 })
+const question = ref(data.question)
+const tiles = ref([])
+const currentTile = ref(null)
+const boardSize = ref(0)
 
 const stepsRemaining = ref(0)
 const stepsAll = ref(0)
@@ -24,7 +17,7 @@ const freezeTiles = ref(false)
 const startGame = () => {
   drawBoard()
   stepsRemaining.value = 0
-  currentTile.value = findTileByType('start')
+  currentTile.value = tiles.value[0]?.id
 }
 
 const rollDice = () => {
@@ -33,32 +26,39 @@ const rollDice = () => {
 }
 
 const drawBoard = () => {
-  const tempList = []
+  const totalTiles = data.tiles.length
+  const size = Math.sqrt(totalTiles)
 
-  for (let row = 0; row < rows; row++) {
-    for (let col = 0; col < cols; col++) {
-      const type = boardLayout[row][col]
-      tempList.push({
-        position: { row, col },
-        type,
-        value: `${type}-${row}-${col}`,
-        visible: false,
-      })
-    }
+  if (!Number.isInteger(size)) {
+    console.error('must be a perfect square')
+    return
   }
 
-  tileList.value = tempList
-}
+  boardSize.value = size
 
-const findTileByType = (type) => {
-  return tileList.value.find((tile) => tile.type === type)?.position || { row: 0, col: 0 }
+  const tempList = []
+
+  for (let id = 0; id < totalTiles; id++) {
+    const tileData = data.tiles[id]
+
+    tempList.push({
+      id,
+      answer: tileData?.answer || false,
+      content: tileData?.content || '',
+      visible: false,
+      firstTile: id === 0,
+      lastTile: id === totalTiles - 1,
+    })
+  }
+
+  tiles.value = tempList
 }
 
 const isAdjacent = (tile) => {
-  const currentRow = currentTile.value.row
-  const currentCol = currentTile.value.col
-  const tileRow = tile.position.row
-  const tileCol = tile.position.col
+  const currentRow = Math.floor(currentTile.value / boardSize.value)
+  const currentCol = currentTile.value % boardSize.value
+  const tileRow = Math.floor(tile.id / boardSize.value)
+  const tileCol = tile.id % boardSize.value
 
   return (
     (tileRow === currentRow && Math.abs(tileCol - currentCol) === 1) ||
@@ -67,40 +67,29 @@ const isAdjacent = (tile) => {
 }
 
 const flipTile = (payload) => {
-  const index = tileList.value.findIndex(
-    (tile) =>
-      tile.position.row === payload.position.row && tile.position.col === payload.position.col,
-  )
+  const tile = tiles.value.find((tile) => tile.id === payload.id)
 
-  if (
-    index === -1 ||
-    tileList.value[index].visible ||
-    stepsRemaining.value <= 0 ||
-    freezeTiles.value
-  )
-    return
-
-  const tile = tileList.value[index]
+  if (!tile || tile.visible || stepsRemaining.value <= 0 || freezeTiles.value) return
 
   if (!isAdjacent(tile)) return
 
   tile.visible = true
   freezeTiles.value = true
 
-  if (tile.type === 'end') {
-    currentTile.value = { ...tile.position }
+  if (tile.lastTile) {
+    currentTile.value = tile.id
     stepsAll.value -= stepsRemaining.value - 1
     stepsRemaining.value = 0
     launchConfetti()
+  } else {
+    stepsRemaining.value--
   }
 }
 
 const handleAnswer = (confirm, tile) => {
-  if (stepsRemaining.value <= 0) return
-
-  if (confirm && tile.type === 'correct') {
-    currentTile.value = { ...tile.position }
-  } else if (!confirm && tile.type === 'wrong') {
+  if (confirm && tile.answer) {
+    currentTile.value = tile.id
+  } else if (!confirm && !tile.answer) {
     tile.visible = false
   } else {
     stepsRemaining.value = 0
@@ -117,17 +106,18 @@ const handleAnswer = (confirm, tile) => {
     <button @click="rollDice" :disabled="stepsRemaining > 0">🎲 Roll Dice</button>
     <p>Steps left: {{ stepsRemaining }}</p>
     <p>All steps: {{ stepsAll }}</p>
+    <h2>{{ question }}</h2>
 
     <section class="board">
       <Tile
-        v-for="tile in tileList"
-        :key="tile.value"
-        :value="tile.value"
-        :type="tile.type"
+        v-for="tile in tiles"
+        :id="tile.id"
+        :key="tile.id"
+        :answer="tile.answer"
+        :content="tile.content"
         :visible="tile.visible"
-        :current-tile="
-          tile.position.row === currentTile.row && tile.position.col === currentTile.col
-        "
+        :current-tile="tile.id === currentTile"
+        :last-tile="tile.lastTile"
         @pick-tile="flipTile(tile)"
         @answer="(confirm) => handleAnswer(confirm, tile)"
       />

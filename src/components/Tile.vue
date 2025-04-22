@@ -2,7 +2,15 @@
 import { computed } from 'vue'
 
 const props = defineProps({
-  value: {
+  id: {
+    type: Number,
+    required: true,
+  },
+  answer: {
+    type: Boolean,
+    required: true,
+  },
+  content: {
     type: String,
     required: true,
   },
@@ -10,11 +18,13 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  type: {
-    type: String,
-  },
   currentTile: {
     type: Boolean,
+    required: true,
+  },
+  lastTile: {
+    type: Boolean,
+    required: true,
   },
 })
 
@@ -40,8 +50,8 @@ const choose = (confirm) => {
 <template>
   <div :class="tileStyles" @click="!visible && pick()">
     <div v-if="visible" class="tile-face face-up">
-      <strong>{{ type }}</strong>
-      <div v-if="type !== 'start' && type !== 'end'">
+      <strong>{{ content }}</strong>
+      <div v-if="!lastTile">
         <button @click.stop="choose(true)">✅</button>
         <button @click.stop="choose(false)">❌</button>
       </div>
