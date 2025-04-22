@@ -15,8 +15,11 @@ const cols = boardLayout[0].length
 
 const tileList = ref([])
 const currentTile = ref({ row: 0, col: 0 })
+
 const stepsRemaining = ref(0)
 const stepsAll = ref(0)
+
+const freezeTiles = ref(false)
 
 const startGame = () => {
   drawBoard()
@@ -25,7 +28,7 @@ const startGame = () => {
 }
 
 const rollDice = () => {
-  stepsRemaining.value = Math.floor(Math.random() * 4) + 1
+  stepsRemaining.value = Math.floor(Math.random() * 4) + 2
   stepsAll.value += stepsRemaining.value
 }
 
@@ -69,25 +72,42 @@ const flipTile = (payload) => {
       tile.position.row === payload.position.row && tile.position.col === payload.position.col,
   )
 
-  if (index === -1 || tileList.value[index].visible || stepsRemaining.value <= 0) return
+  if (
+    index === -1 ||
+    tileList.value[index].visible ||
+    stepsRemaining.value <= 0 ||
+    freezeTiles.value
+  )
+    return
 
   const tile = tileList.value[index]
 
   if (!isAdjacent(tile)) return
 
   tile.visible = true
+  freezeTiles.value = true
 
-  if (tile.type === 'correct') {
-    currentTile.value = { ...tile.position }
-    stepsRemaining.value -= 1
-  } else if (tile.type === 'end') {
+  if (tile.type === 'end') {
     currentTile.value = { ...tile.position }
     stepsAll.value -= stepsRemaining.value - 1
     stepsRemaining.value = 0
     launchConfetti()
+  }
+}
+
+const handleAnswer = (confirm, tile) => {
+  if (stepsRemaining.value <= 0) return
+
+  if (confirm && tile.type === 'correct') {
+    currentTile.value = { ...tile.position }
+  } else if (!confirm && tile.type === 'wrong') {
+    tile.visible = false
   } else {
     stepsRemaining.value = 0
+    tile.visible = false
   }
+
+  freezeTiles.value = false
 }
 </script>
 
@@ -109,6 +129,7 @@ const flipTile = (payload) => {
           tile.position.row === currentTile.row && tile.position.col === currentTile.col
         "
         @pick-tile="flipTile(tile)"
+        @answer="(confirm) => handleAnswer(confirm, tile)"
       />
     </section>
   </main>
