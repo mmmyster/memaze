@@ -7,14 +7,13 @@ import Tile from '@/components/Tile.vue'
 const question = ref(data.question)
 const tiles = ref([])
 const currentTile = ref(null)
+const firstTile = ref(null)
 const boardSize = ref(0)
 
 const stepsRemaining = ref(0)
 const stepsAll = ref(0)
 
 const freezeTiles = ref(false)
-
-const choiceMade = ref(false)
 
 onMounted(() => {
   startGame()
@@ -24,17 +23,16 @@ const startGame = () => {
   drawBoard()
   stepsRemaining.value = 0
 
-  if (tiles.value[0]) {
+  if (firstTile.value) {
     setTimeout(() => {
-      currentTile.value = tiles.value[0].id
-      tiles.value[0].visible = true
-      handleAnswer(tiles.value[0])
+      currentTile.value = firstTile.value.id
+      firstTile.value.visible = true
     }, 100)
   }
 }
 
 const rollDice = () => {
-  if (!choiceMade.value) return
+  if (!firstTile.value?.answered) return
   stepsRemaining.value = Math.floor(Math.random() * 4) + 2
   stepsAll.value += stepsRemaining.value
 }
@@ -60,9 +58,14 @@ const drawBoard = () => {
       answer: tileData?.answer || false,
       content: tileData?.content || '',
       visible: false,
+      answered: false,
       firstTile: id === 0,
       lastTile: id === totalTiles - 1,
     })
+
+    if (tempList[0].firstTile) {
+      firstTile.value = tempList[0]
+    }
   }
 
   tiles.value = tempList
@@ -101,13 +104,15 @@ const flipTile = (payload) => {
 }
 
 const handleAnswer = (confirm, tile) => {
+  if (tile.answered) return
+
   if (confirm && tile.answer) {
     currentTile.value = tile.id
-    choiceMade.value = true
+    tile.answered = true
   } else if (!confirm && !tile.answer) {
     tile.visible = false
   } else {
-    if (currentTile.value != tiles.value[0].id) {
+    if (firstTile.value?.answered) {
       stepsRemaining.value = 0
       tile.visible = false
     }
@@ -120,7 +125,7 @@ const handleAnswer = (confirm, tile) => {
 <template>
   <main>
     <button @click="startGame">Start Game</button>
-    <button @click="rollDice" :disabled="stepsRemaining > 0 || !choiceMade">🎲</button>
+    <button @click="rollDice" :disabled="stepsRemaining > 0">🎲</button>
     <p>Steps left: {{ stepsRemaining }}</p>
     <p>All steps: {{ stepsAll }}</p>
     <h2>{{ question }}</h2>
@@ -133,6 +138,7 @@ const handleAnswer = (confirm, tile) => {
         :answer="tile.answer"
         :content="tile.content"
         :visible="tile.visible"
+        :answered="tile.answered"
         :current-tile="tile.id === currentTile"
         :last-tile="tile.lastTile"
         @pick-tile="flipTile(tile)"

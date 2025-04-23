@@ -18,6 +18,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  answered: {
+    type: Boolean,
+    default: false,
+  },
   currentTile: {
     type: Boolean,
     required: true,
@@ -51,7 +55,7 @@ const choose = (confirm) => {
   <div :class="tileStyles" @click="!visible && pick()">
     <div v-if="visible" class="tile-face face-up">
       <strong>{{ content }}</strong>
-      <div v-if="!lastTile">
+      <div v-if="!answered && !lastTile">
         <button @click.stop="choose(true)">✅</button>
         <button @click.stop="choose(false)">❌</button>
       </div>
