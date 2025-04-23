@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { data } from '@/data'
 import { launchConfetti } from '@/utilities/confetti'
 import Tile from '@/components/Tile.vue'
@@ -14,13 +14,27 @@ const stepsAll = ref(0)
 
 const freezeTiles = ref(false)
 
+const choiceMade = ref(false)
+
+onMounted(() => {
+  startGame()
+})
+
 const startGame = () => {
   drawBoard()
   stepsRemaining.value = 0
-  currentTile.value = tiles.value[0]?.id
+
+  if (tiles.value[0]) {
+    setTimeout(() => {
+      currentTile.value = tiles.value[0].id
+      tiles.value[0].visible = true
+      handleAnswer(tiles.value[0])
+    }, 100)
+  }
 }
 
 const rollDice = () => {
+  if (!choiceMade.value) return
   stepsRemaining.value = Math.floor(Math.random() * 4) + 2
   stepsAll.value += stepsRemaining.value
 }
@@ -89,11 +103,14 @@ const flipTile = (payload) => {
 const handleAnswer = (confirm, tile) => {
   if (confirm && tile.answer) {
     currentTile.value = tile.id
+    choiceMade.value = true
   } else if (!confirm && !tile.answer) {
     tile.visible = false
   } else {
-    stepsRemaining.value = 0
-    tile.visible = false
+    if (currentTile.value != tiles.value[0].id) {
+      stepsRemaining.value = 0
+      tile.visible = false
+    }
   }
 
   freezeTiles.value = false
@@ -103,7 +120,7 @@ const handleAnswer = (confirm, tile) => {
 <template>
   <main>
     <button @click="startGame">Start Game</button>
-    <button @click="rollDice" :disabled="stepsRemaining > 0">🎲 Roll Dice</button>
+    <button @click="rollDice" :disabled="stepsRemaining > 0 || !choiceMade">🎲</button>
     <p>Steps left: {{ stepsRemaining }}</p>
     <p>All steps: {{ stepsAll }}</p>
     <h2>{{ question }}</h2>

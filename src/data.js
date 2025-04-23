@@ -2,7 +2,7 @@ export const data =
 {
   "question": "Is this the CORRECT answer?",
   "tiles": [
-    { "id": 0, "answer": false, "content": "Correct" },
+    { "id": 0, "answer": true, "content": "Correct" },
     { "id": 1, "answer": true, "content": "Correct" },
     { "id": 2, "answer": false, "content": "Wrong" },
     { "id": 3, "answer": false, "content": "Wrong" },
