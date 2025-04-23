@@ -30,6 +30,10 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+  steppable: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['pick-tile', 'answer'])
@@ -39,6 +43,8 @@ const tileStyles = computed(() => {
     tile: true,
     'is-flipped': props.visible,
     current: props.currentTile,
+    answered: props.answered,
+    steppable: props.steppable,
   }
 })
 
@@ -74,5 +80,9 @@ button {
   font-size: 12px;
   padding: 2px 6px;
   cursor: pointer;
+}
+
+.tile.steppable .tile-face {
+  background-color: grey;
 }
 </style>

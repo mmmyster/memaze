@@ -83,6 +83,16 @@ const isAdjacent = (tile) => {
   )
 }
 
+const isSteppable = (tile) => {
+  return (
+    !tile.visible &&
+    !tile.answered &&
+    isAdjacent(tile) &&
+    stepsRemaining.value > 0 &&
+    !freezeTiles.value
+  )
+}
+
 const flipTile = (payload) => {
   const tile = tiles.value.find((tile) => tile.id === payload.id)
 
@@ -139,6 +149,7 @@ const handleAnswer = (confirm, tile) => {
         :content="tile.content"
         :visible="tile.visible"
         :answered="tile.answered"
+        :steppable="isSteppable(tile)"
         :current-tile="tile.id === currentTile"
         :last-tile="tile.lastTile"
         @pick-tile="flipTile(tile)"
