@@ -14,6 +14,7 @@ const stepsRemaining = ref(0)
 const stepsAll = ref(0)
 
 const freezeTiles = ref(false)
+const endDialog = ref(null)
 
 onMounted(() => {
   startGame()
@@ -108,8 +109,23 @@ const flipTile = (payload) => {
     stepsAll.value -= stepsRemaining.value - 1
     stepsRemaining.value = 0
     launchConfetti()
+    showDialog()
   } else {
     stepsRemaining.value--
+  }
+}
+
+const showDialog = () => {
+  const dialog = endDialog.value
+  if (dialog) {
+    dialog.showModal()
+  }
+}
+
+const closeDialog = () => {
+  const dialog = endDialog.value
+  if (dialog) {
+    dialog.close()
   }
 }
 
@@ -134,10 +150,11 @@ const handleAnswer = (confirm, tile) => {
 
 <template>
   <main>
-    <button @click="startGame">Start Game</button>
+    <button @click="startGame">Hrať znovu</button>
     <button @click="rollDice" :disabled="stepsRemaining > 0">🎲</button>
-    <p>Steps left: {{ stepsRemaining }}</p>
-    <p>All steps: {{ stepsAll }}</p>
+    <p>
+      Zostáva ti <b>{{ stepsRemaining }}</b> krokov.
+    </p>
     <h2>{{ question }}</h2>
 
     <section class="board">
@@ -156,6 +173,10 @@ const handleAnswer = (confirm, tile) => {
         @answer="(confirm) => handleAnswer(confirm, tile)"
       />
     </section>
+
+    <dialog ref="endDialog" @click="closeDialog">
+      Hru si zvládol dohrať za {{ stepsAll }} krokov!
+    </dialog>
   </main>
 </template>
 
