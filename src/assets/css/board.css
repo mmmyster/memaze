@@ -1,16 +1,17 @@
 .board {
   display: grid;
   grid-template-columns: repeat(4, 100px);
+  gap: 5px;
 
   justify-content: center;
 }
 
 .row {
   display: flex;
-  gap: 1px;
+  gap: 5px;
 }
 
-.tile:nth-child(1),
+/* .tile:nth-child(1),
 .tile:nth-child(1) > .tile-face {
   border-radius: 8px 0 0 0;
 }
@@ -32,7 +33,7 @@
 
 .tile.move {
   transition: all 0.5s ease;
-}
+} */
 
 .tile {
   font-size: 1rem;
@@ -53,7 +54,7 @@
 .is-flipped {
   background: rgb(180, 181, 193);
   border: 2px solid #000;
-  border-radius: 0 !important;
+  /* border-radius: 0 !important; */
   transform: rotateY(180deg);
   z-index: 2;
 }
@@ -81,6 +82,6 @@
 }
 
 .tile-face.face-down {
-  background: rgb(242, 242, 242);
+  background: center / contain no-repeat url('../../public/img/tile_back.png');
   color: #fff;
 }

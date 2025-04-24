@@ -61,12 +61,16 @@ const choose = (confirm) => {
   <div :class="tileStyles" @click="!visible && pick()">
     <div v-if="visible" class="tile-face face-up">
       <strong>{{ content }}</strong>
-      <div v-if="!answered && !lastTile">
-        <button @click.stop="choose(true)">✅</button>
-        <button @click.stop="choose(false)">❌</button>
+      <div class="btn-container" v-if="!answered && !lastTile">
+        <button @click.stop="choose(true)">
+          <img src="../../public/img/yes_btn.png" alt="yes button" />
+        </button>
+        <button @click.stop="choose(false)">
+          <img src="../../public/img/no_btn.png" alt="no button" />
+        </button>
       </div>
     </div>
-    <div v-else class="tile-face face-down">❓</div>
+    <div v-else class="tile-face face-down"></div>
   </div>
 </template>
 
@@ -75,14 +79,33 @@ const choose = (confirm) => {
   border-color: red;
 }
 
+.btn-container {
+  display: flex;
+  justify-content: space-evenly;
+}
+
 button {
-  margin: 2px;
-  font-size: 12px;
-  padding: 2px 6px;
+  border: none;
+  margin: 0;
+  padding: 0;
+  width: auto;
+  overflow: visible;
+
+  background: transparent;
+
   cursor: pointer;
 }
 
+button:hover {
+  transform: scale(0.9);
+}
+
+button img {
+  max-width: 100%;
+  width: 38px;
+}
+
 .tile.steppable .tile-face {
-  background-color: grey;
+  background: center / 22% no-repeat url('../../public/img/tile_steppable.png');
 }
 </style>
