@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { data } from '@/data'
 import { launchConfetti } from '@/utilities/confetti'
 import Tile from '@/components/Tile.vue'
+import Dice from '@/components/Dice.vue'
 
 const question = ref(data.question)
 const tiles = ref([])
@@ -13,12 +14,13 @@ const boardSize = ref(0)
 const currentTilePos = ref(null)
 const lastTilePos = ref(null)
 
+const diceRef = ref(null)
+const dialogRef = ref(null)
+
 const stepsRemaining = ref(0)
 const stepsAll = ref(0)
 
 const freezeTiles = ref(false)
-const endDialog = ref(null)
-
 const answeredWrong = ref(false)
 
 onMounted(() => {
@@ -38,10 +40,9 @@ const startGame = () => {
   }
 }
 
-const rollDice = () => {
-  if (!firstTile.value?.answered) return
-  stepsRemaining.value = Math.floor(Math.random() * 4) + 2
-  stepsAll.value += stepsRemaining.value
+const onDiceRolled = (value) => {
+  stepsRemaining.value = value
+  stepsAll.value += value
 }
 
 const drawBoard = () => {
@@ -135,7 +136,14 @@ const isSteppable = (tile) => {
 const flipTile = (payload) => {
   const tile = tiles.value.find((tile) => tile.id === payload.id)
 
-  if (!tile || tile.visible || stepsRemaining.value <= 0 || freezeTiles.value) return
+  if (!tile) return
+
+  if (tile.visible || stepsRemaining.value <= 0 || freezeTiles.value) {
+    if (stepsRemaining.value <= 0 && diceRef.value && firstTile.value?.answered) {
+      diceRef.value.triggerShake()
+    }
+    return
+  }
 
   if (!isNeighbor(tile)) return
 
@@ -157,14 +165,14 @@ const flipTile = (payload) => {
 
 // DIALOG
 const showDialog = () => {
-  const dialog = endDialog.value
+  const dialog = dialogRef.value
   if (dialog) {
     dialog.showModal()
   }
 }
 
 const closeDialog = () => {
-  const dialog = endDialog.value
+  const dialog = dialogRef.value
   if (dialog) {
     dialog.close()
   }
@@ -202,7 +210,11 @@ const handleAnswer = (confirm, tile) => {
         Zostáva ti <b>{{ stepsRemaining }}</b> krokov.
       </p>
 
-      <button @click="rollDice" :disabled="stepsRemaining > 0">🎲</button>
+      <Dice
+        ref="diceRef"
+        :disabled="!firstTile?.answered || stepsRemaining > 0"
+        @rolled="onDiceRolled"
+      />
     </div>
     <h2>{{ question }}</h2>
 
@@ -232,7 +244,7 @@ const handleAnswer = (confirm, tile) => {
       />
     </section>
 
-    <dialog ref="endDialog" @click="closeDialog">
+    <dialog ref="dialogRef" @click="closeDialog">
       Hru si zvládol dohrať za {{ stepsAll }} krokov!
     </dialog>
   </main>
@@ -242,6 +254,7 @@ const handleAnswer = (confirm, tile) => {
 .header {
   display: flex;
   justify-content: space-evenly;
+  align-items: end;
 }
 
 .player,
