@@ -16,6 +16,7 @@ const lastTilePos = ref(null)
 
 const diceRef = ref(null)
 const dialogRef = ref(null)
+const hint = ref('')
 
 const stepsRemaining = ref(0)
 const stepsAll = ref(0)
@@ -141,14 +142,19 @@ const flipTile = (payload) => {
   if (tile.visible || stepsRemaining.value <= 0 || freezeTiles.value) {
     if (stepsRemaining.value <= 0 && diceRef.value && firstTile.value?.answered) {
       diceRef.value.triggerShake()
+      hint.value = 'Pomôcka: Musíš hodiť kockou a číslo, ktoré ti padne je počet ťahov.'
     }
     return
   }
 
-  if (!isNeighbor(tile)) return
+  if (!isNeighbor(tile)) {
+    hint.value = 'Pomôcka: Odhaliť môžeš len susedné kartičky.'
+    return
+  }
 
   tile.visible = true
   freezeTiles.value = true
+  hint.value = ''
 
   updatePlayerPos(tile.id)
 
@@ -203,19 +209,18 @@ const handleAnswer = (confirm, tile) => {
 </script>
 
 <template>
-  <main>
-    <button @click="startGame">Hrať znovu</button>
-    <div class="header">
-      <p>
-        Zostáva ti <b>{{ stepsRemaining }}</b> krokov.
-      </p>
+  <header>
+    <p>
+      Zostáva ti <b>{{ stepsRemaining }}</b> krokov.
+    </p>
 
-      <Dice
-        ref="diceRef"
-        :disabled="!firstTile?.answered || stepsRemaining > 0"
-        @rolled="onDiceRolled"
-      />
-    </div>
+    <Dice
+      ref="diceRef"
+      :disabled="!firstTile?.answered || stepsRemaining > 0"
+      @rolled="onDiceRolled"
+    />
+  </header>
+  <main>
     <h2>{{ question }}</h2>
 
     <section class="board">
@@ -248,10 +253,16 @@ const handleAnswer = (confirm, tile) => {
       Hru si zvládol dohrať za {{ stepsAll }} krokov!
     </dialog>
   </main>
+
+  <footer>
+    <button @click="startGame">Hrať znovu</button>
+
+    <div class="hint">{{ hint }}</div>
+  </footer>
 </template>
 
 <style scoped>
-.header {
+header {
   display: flex;
   justify-content: space-evenly;
   align-items: end;
@@ -278,5 +289,40 @@ const handleAnswer = (confirm, tile) => {
   height: 85px;
   background: url('/img/kite.png');
   background-size: cover;
+}
+
+button {
+  background: #ffaaac;
+  padding-right: 10px;
+  padding-left: 10px;
+  min-height: 28px;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 5px;
+  border: none;
+  align-self: start;
+}
+
+.hint {
+  max-width: 20rem;
+  min-height: 60px;
+
+  padding-top: 11.1px;
+  text-align: center;
+}
+
+dialog {
+  border: none;
+  outline: none;
+
+  margin-bottom: auto;
+  min-width: auto;
+
+  border-radius: 5px;
+  background: #141620;
+  color: rgb(236, 236, 236);
+  font-weight: bold;
+  font-size: 28px;
+  line-height: 28px;
 }
 </style>
