@@ -43,6 +43,7 @@ const tileStyles = computed(() => {
     tile: true,
     'is-flipped': props.visible,
     current: props.currentTile,
+    last: props.lastTile,
     answered: props.answered,
     steppable: props.steppable,
   }
@@ -55,18 +56,23 @@ const pick = () => {
 const choose = (confirm) => {
   emit('answer', confirm)
 }
+
+const isImage = (url) => {
+  return /\.(jpg|jpeg|png|gif|bmp|svg)$/i.test(url)
+}
 </script>
 
 <template>
   <div :class="tileStyles" @click="!visible && pick()">
     <div v-if="visible" class="tile-face face-up">
-      <strong>{{ content }}</strong>
+      <img v-if="isImage(content)" :src="content" alt="" />
+      <div v-else>{{ content }}</div>
       <div class="btn-container" v-if="!answered && !lastTile">
-        <button @click.stop="choose(true)">
-          <img src="../../public/img/yes_btn.png" alt="yes button" />
+        <button @click.stop="choose(true)" class="zoomOutButton">
+          <img src="/img/yes_btn.png" alt="yes button" />
         </button>
-        <button @click.stop="choose(false)">
-          <img src="../../public/img/no_btn.png" alt="no button" />
+        <button @click.stop="choose(false)" class="zoomOutButton">
+          <img src="/img/no_btn.png" alt="no button" />
         </button>
       </div>
     </div>
@@ -75,16 +81,24 @@ const choose = (confirm) => {
 </template>
 
 <style scoped>
-.current {
-  border-color: red;
+.tile-face > img {
+  width: auto;
+  height: auto;
+  max-height: 63px;
+}
+
+.last .tile-face > img {
+  max-height: 100px;
 }
 
 .btn-container {
   display: flex;
   justify-content: space-evenly;
+  position: absolute;
+  bottom: 0;
 }
 
-button {
+.btn-container button {
   border: none;
   margin: 0;
   padding: 0;
@@ -96,16 +110,8 @@ button {
   cursor: pointer;
 }
 
-button:hover {
-  transform: scale(0.9);
-}
-
 button img {
-  max-width: 100%;
-  width: 38px;
-}
-
-.tile.steppable .tile-face {
-  background: center / 22% no-repeat url('../../public/img/tile_steppable.png');
+  max-width: 38px;
+  width: 100%;
 }
 </style>

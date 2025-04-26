@@ -1,0 +1,145 @@
+@keyframes shakeX {
+  from,
+  to {
+    transform: translate3d(0, 0, 0) scale3d(1.1, 1.1, 1.1);
+  }
+
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translate3d(-10px, 0, 0) scale3d(1.1, 1.1, 1.1);
+  }
+
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translate3d(10px, 0, 0) scale3d(1.1, 1.1, 1.1);
+  }
+}
+
+@keyframes shakeY {
+  from,
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translate3d(0, -10px, 0);
+  }
+
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translate3d(0, 10px, 0);
+  }
+}
+
+@keyframes zoomIn {
+  to {
+    transform: scale3d(1.1, 1.1, 1.1);
+  }
+}
+
+@keyframes zoomOut {
+  from {
+    transform: scale3d(1.1, 1.1, 1.1);
+  }
+  to {
+    transform: scale3d(1, 1, 1);
+  }
+}
+
+@keyframes zoomOutButton {
+  to {
+    transform: scale3d(0.8, 0.8, 0.8);
+  }
+}
+
+@keyframes flipInY {
+  from {
+    transform: perspective(400px) rotate3d(0, 1, 0, 90deg);
+    animation-timing-function: ease-in;
+    opacity: 0;
+  }
+
+  40% {
+    transform: perspective(400px) rotate3d(0, 1, 0, -20deg);
+    animation-timing-function: ease-in;
+  }
+
+  60% {
+    transform: perspective(400px) rotate3d(0, 1, 0, 10deg);
+    opacity: 1;
+  }
+
+  80% {
+    transform: perspective(400px) rotate3d(0, 1, 0, -5deg);
+  }
+
+  to {
+    transform: perspective(400px);
+  }
+}
+
+@keyframes ellipse {
+  0% {
+    transform: translateX(0) translateY(0);
+  }
+  25% {
+    transform: translateX(12px) translateY(-6px);
+  }
+  50% {
+    transform: translateX(25px) translateY(0);
+  }
+  75% {
+    transform: translateX(12px) translateY(6px);
+  }
+  100% {
+    transform: translateX(0) translateY(0);
+  }
+}
+
+.zoomIn {
+  backface-visibility: visible !important;
+  animation-name: flipInY, zoomIn;
+  animation-duration: 0.3s, 0.3s;
+  animation-fill-mode: forwards;
+}
+
+.zoomOut {
+  animation-name: zoomOut;
+  animation-duration: 0.3s;
+}
+
+.zoomOutButton:hover {
+  animation-name: zoomOutButton;
+  animation-duration: 0.3s;
+  animation-fill-mode: forwards;
+}
+
+.shakeX {
+  animation-name: shakeX;
+  animation-duration: 1s;
+}
+
+.shakeY {
+  animation-name: shakeY;
+  animation-duration: 30s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+}
+
+.ellipse {
+  animation-name: ellipse;
+  animation-duration: 7s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+}
