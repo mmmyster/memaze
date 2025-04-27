@@ -24,9 +24,16 @@ const stepsAll = ref(0)
 const freezeTiles = ref(false)
 const answeredWrong = ref(false)
 
+const windowWidth = ref(window.innerWidth)
+
 onMounted(() => {
   startGame()
+  window.addEventListener('resize', handleWindowSizeChange)
 })
+
+const handleWindowSizeChange = () => {
+  windowWidth.value = window.innerWidth
+}
 
 const startGame = () => {
   drawBoard()
@@ -45,6 +52,12 @@ const onDiceRolled = (value) => {
   stepsRemaining.value = value
   stepsAll.value += value
 }
+
+const tileSize = computed(() => {
+  const maxBoardWidth = windowWidth.value * 0.8
+  const sizePerTile = maxBoardWidth / boardSize.value
+  return Math.min(Math.max(sizePerTile, 60), 120)
+})
 
 const drawBoard = () => {
   const totalTiles = data.tiles.length
@@ -91,23 +104,29 @@ const updatePlayerPos = (tileId) => {
   const tile = tiles.value[tileId]
   const row = Math.floor(tile.id / boardSize.value)
   const col = tile.id % boardSize.value
-  currentTilePos.value = { top: row * 100, left: col * 100 }
+  currentTilePos.value = {
+    top: row * tileSize.value,
+    left: col * tileSize.value,
+  }
 }
 
 const setFinishPos = () => {
   const row = Math.floor(lastTilePos.value.id / boardSize.value)
   const col = lastTilePos.value.id % boardSize.value
-  lastTilePos.value = { top: row * 100, left: col * 100 }
+  lastTilePos.value = {
+    top: row * tileSize.value,
+    left: col * tileSize.value,
+  }
 }
 
 const playerPos = computed(() => ({
-  top: `${currentTilePos.value?.top - 33}px`,
-  left: `${currentTilePos.value?.left - 20}px`,
+  top: `${currentTilePos.value?.top - tileSize.value * 0.33}px`,
+  left: `${currentTilePos.value?.left - tileSize.value * 0.2}px`,
 }))
 
 const kitePos = computed(() => ({
-  top: `${lastTilePos.value?.top + 70}px`,
-  left: `${lastTilePos.value?.left + 90}px`,
+  top: `${lastTilePos.value?.top + tileSize.value * 0.7}px`,
+  left: `${lastTilePos.value?.left + tileSize.value * 0.9}px`,
 }))
 
 // NEIGHBOR TILES
@@ -220,10 +239,17 @@ const handleAnswer = (confirm, tile) => {
       @rolled="onDiceRolled"
     />
   </header>
+
   <main>
     <h2>{{ question }}</h2>
 
-    <section class="board">
+    <section
+      class="board"
+      :style="{
+        gridTemplateColumns: `repeat(${boardSize}, ${tileSize}px)`,
+        gridTemplateRows: `repeat(${boardSize}, ${tileSize}px)`,
+      }"
+    >
       <div v-if="currentTilePos" :style="playerPos" class="player ellipse"></div>
 
       <div v-if="lastTilePos" :style="kitePos" class="kite shakeY"></div>
@@ -239,6 +265,10 @@ const handleAnswer = (confirm, tile) => {
         :steppable="isSteppable(tile)"
         :current-tile="tile.id === currentTile"
         :last-tile="tile.lastTile"
+        :style="{
+          width: tileSize + 'px',
+          height: tileSize + 'px',
+        }"
         :class="{
           zoomIn: !tile.answered && tile.visible,
           shakeX: tile.visible && !tile.answered && answeredWrong,
@@ -293,6 +323,7 @@ header {
 
 button {
   background: #ffaaac;
+  color: #000;
   padding-right: 10px;
   padding-left: 10px;
   min-height: 28px;
@@ -300,7 +331,7 @@ button {
   cursor: pointer;
   border-radius: 5px;
   border: none;
-  align-self: start;
+  /* align-self: start; */
 }
 
 .hint {
