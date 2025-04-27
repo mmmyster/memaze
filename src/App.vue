@@ -25,6 +25,7 @@ const freezeTiles = ref(false)
 const answeredWrong = ref(false)
 
 const windowWidth = ref(window.innerWidth)
+const windowHeight = ref(window.innerHeight)
 
 onMounted(() => {
   startGame()
@@ -33,6 +34,7 @@ onMounted(() => {
 
 const handleWindowSizeChange = () => {
   windowWidth.value = window.innerWidth
+  windowHeight.value = window.innerHeight
 }
 
 const startGame = () => {
@@ -55,7 +57,13 @@ const onDiceRolled = (value) => {
 
 const tileSize = computed(() => {
   const maxBoardWidth = windowWidth.value * 0.8
-  const sizePerTile = maxBoardWidth / boardSize.value
+  const maxBoardHeight = windowHeight.value * 0.6
+
+  const sizeByWidth = maxBoardWidth / boardSize.value
+  const sizeByHeight = maxBoardHeight / boardSize.value
+
+  const sizePerTile = Math.min(sizeByWidth, sizeByHeight)
+
   return Math.min(Math.max(sizePerTile, 60), 120)
 })
 

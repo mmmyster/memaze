@@ -60,12 +60,16 @@ const choose = (confirm) => {
 const isImage = (url) => {
   return /\.(jpg|jpeg|png|gif|bmp|svg)$/i.test(url)
 }
+
+const fullImagePath = (path) => {
+  return import.meta.env.BASE_URL + path.replace(/^\/+/, '')
+}
 </script>
 
 <template>
   <div :class="tileStyles" @click="!visible && pick()">
     <div v-if="visible" class="tile-face face-up">
-      <img v-if="isImage(content)" :src="content" alt="" />
+      <img v-if="isImage(content)" :src="fullImagePath(content)" alt="" />
       <div v-else>{{ content }}</div>
       <div class="btn-container" v-if="!answered && !lastTile">
         <button @click.stop="choose(true)" class="zoomOutButton">
