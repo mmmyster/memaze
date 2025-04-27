@@ -298,6 +298,10 @@ header {
   align-items: end;
 }
 
+h2 {
+  max-width: 40rem;
+}
+
 .player,
 .kite {
   position: absolute;

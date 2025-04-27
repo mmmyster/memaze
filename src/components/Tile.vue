@@ -84,11 +84,6 @@ const isImage = (url) => {
 .tile-face > img {
   width: auto;
   height: auto;
-  max-height: 63px;
-}
-
-.last .tile-face > img {
-  max-height: 100px;
 }
 
 .btn-container {
