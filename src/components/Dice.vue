@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 const props = defineProps({
   disabled: {
@@ -12,7 +12,7 @@ const emit = defineEmits(['rolled'])
 
 const rotate = ref(false)
 const value = ref(2)
-const headShake = ref(false)
+const bounce = ref(false)
 
 const roll = () => {
   if (props.disabled || rotate.value) return
@@ -32,26 +32,24 @@ const roll = () => {
   }, 1000)
 }
 
+watch(
+  () => props.disabled,
+  (newDisabled) => {
+    if (!newDisabled && !rotate.value) {
+      bounce.value = true
+    } else {
+      bounce.value = false
+    }
+  },
+)
+
 const pips = computed(() => {
   return Array.from({ length: value.value }, (_, i) => i)
-})
-
-const triggerShake = () => {
-  if (rotate.value) return
-
-  headShake.value = true
-  setTimeout(() => {
-    headShake.value = false
-  }, 500)
-}
-
-defineExpose({
-  triggerShake,
 })
 </script>
 
 <template>
-  <div class="face" :class="{ rotate, headShake }" @click="roll">
+  <div class="face" :class="{ rotate, bounce }" @click="roll">
     <span v-for="(pip, index) in pips" :key="index" class="pip" />
   </div>
 </template>

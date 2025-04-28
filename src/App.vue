@@ -40,6 +40,7 @@ const handleWindowSizeChange = () => {
 const startGame = () => {
   drawBoard()
   stepsRemaining.value = 0
+  stepsAll.value = 0
 
   if (firstTile.value) {
     setTimeout(() => {
@@ -107,7 +108,7 @@ const drawBoard = () => {
   setFinishPos()
 }
 
-// SPRITES POSITIONS
+// SPRITES STYLE
 const updatePlayerPos = (tileId) => {
   const tile = tiles.value[tileId]
   const row = Math.floor(tile.id / boardSize.value)
@@ -127,12 +128,16 @@ const setFinishPos = () => {
   }
 }
 
-const playerPos = computed(() => ({
+const playerStyle = computed(() => ({
+  width: `${tileSize.value * 0.8}px`,
+  height: `${tileSize.value * 0.5}px`,
   top: `${currentTilePos.value?.top - tileSize.value * 0.33}px`,
   left: `${currentTilePos.value?.left - tileSize.value * 0.2}px`,
 }))
 
-const kitePos = computed(() => ({
+const kiteStyle = computed(() => ({
+  width: `${tileSize.value * 0.35}px`,
+  height: `${tileSize.value * 0.9}px`,
   top: `${lastTilePos.value?.top + tileSize.value * 0.7}px`,
   left: `${lastTilePos.value?.left + tileSize.value * 0.9}px`,
 }))
@@ -168,8 +173,7 @@ const flipTile = (payload) => {
 
   if (tile.visible || stepsRemaining.value <= 0 || freezeTiles.value) {
     if (stepsRemaining.value <= 0 && diceRef.value && firstTile.value?.answered) {
-      diceRef.value.triggerShake()
-      hint.value = 'Pomôcka: Musíš hodiť kockou a číslo, ktoré ti padne je počet ťahov.'
+      hint.value = 'Pomôcka: Hoď kockou a číslo, ktoré ti padne je počet ťahov.'
     }
     return
   }
@@ -243,7 +247,7 @@ const handleAnswer = (confirm, tile) => {
 
     <Dice
       ref="diceRef"
-      :disabled="!firstTile?.answered || stepsRemaining > 0"
+      :disabled="!firstTile?.answered || stepsRemaining > 0 || freezeTiles"
       @rolled="onDiceRolled"
     />
   </header>
@@ -258,9 +262,9 @@ const handleAnswer = (confirm, tile) => {
         gridTemplateRows: `repeat(${boardSize}, ${tileSize}px)`,
       }"
     >
-      <div v-if="currentTilePos" :style="playerPos" class="player ellipse"></div>
+      <div v-if="currentTilePos" :style="playerStyle" class="player ellipse"></div>
 
-      <div v-if="lastTilePos" :style="kitePos" class="kite shakeY"></div>
+      <div v-if="lastTilePos" :style="kiteStyle" class="kite shakeY"></div>
 
       <Tile
         v-for="tile in tiles"
@@ -317,8 +321,8 @@ h2 {
 }
 
 .player {
-  width: 80px;
-  height: 50px;
+  /* width: 80px;
+  height: 50px; */
   background: url('/img/player.png');
   background-size: cover;
   transition:
@@ -327,8 +331,8 @@ h2 {
 }
 
 .kite {
-  width: 35px;
-  height: 85px;
+  /* width: 35px;
+  height: 85px; */
   background: url('/img/kite.png');
   background-size: cover;
 }

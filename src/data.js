@@ -1,6 +1,6 @@
 export const data =
 {
-  "question": "Ktorý z obrazov bol namaľovaný počas obdobia RENESANCIE?",
+  "question": "Ktoré obrazy boli namaľované počas obdobia RENESANCIE?",
   "tiles": [
     { "id": 0, "answer": true, "content": "/img/960px-Brueghel-tower-of-babel.jpg" },
     { "id": 1, "answer": true, "content": "/img/991px-Pieter_Bruegel_the_Elder_-_Children’s_Games_-_Google_Art_Project.jpg" },
