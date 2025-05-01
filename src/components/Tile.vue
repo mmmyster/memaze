@@ -10,7 +10,11 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
-  content: {
+  image: {
+    type: String,
+    required: true,
+  },
+  text: {
     type: String,
     required: true,
   },
@@ -57,10 +61,6 @@ const choose = (confirm) => {
   emit('answer', confirm)
 }
 
-const isImage = (url) => {
-  return /\.(jpg|jpeg|png|gif|bmp|svg)$/i.test(url)
-}
-
 const fullImagePath = (path) => {
   return import.meta.env.BASE_URL + path.replace(/^\/+/, '')
 }
@@ -69,8 +69,8 @@ const fullImagePath = (path) => {
 <template>
   <div :class="tileStyles" @click="!visible && pick()">
     <div v-if="visible" class="tile-face face-up">
-      <img v-if="isImage(content)" :src="fullImagePath(content)" alt="" />
-      <div v-else>{{ content }}</div>
+      <img v-if="image" :src="fullImagePath(image)" alt="" />
+      <p v-if="text" class="text">{{ text }}</p>
       <div class="btn-container" v-if="!answered && !lastTile">
         <button @click.stop="choose(true)" class="zoomOutButton">
           <img src="/img/yes_btn.png" alt="yes button" />
@@ -85,9 +85,18 @@ const fullImagePath = (path) => {
 </template>
 
 <style scoped>
+.text {
+  color: #fff;
+  position: absolute;
+  align-self: center;
+  font-weight: bold;
+  font-size: 18px;
+}
+
 .tile-face > img {
-  width: auto;
-  height: auto;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .btn-container {

@@ -87,7 +87,8 @@ const drawBoard = () => {
     tempList.push({
       id,
       answer: tileData?.answer || false,
-      content: tileData?.content || '',
+      image: tileData?.image || '',
+      text: tileData?.text || '',
       visible: false,
       answered: false,
       firstTile: id === 0,
@@ -271,7 +272,8 @@ const handleAnswer = (confirm, tile) => {
         :id="tile.id"
         :key="tile.id"
         :answer="tile.answer"
-        :content="tile.content"
+        :image="tile.image"
+        :text="tile.text"
         :visible="tile.visible"
         :answered="tile.answered"
         :steppable="isSteppable(tile)"
