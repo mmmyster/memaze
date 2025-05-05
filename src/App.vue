@@ -1,11 +1,13 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { data } from '@/data'
+import renaissanceData from '@/renaissance'
+import spaceData from '@/space'
 import { launchConfetti } from '@/utilities/confetti'
 import Tile from '@/components/Tile.vue'
 import Dice from '@/components/Dice.vue'
 
-const question = ref(data.question)
+const data = ref(renaissanceData)
+const question = computed(() => data.value.question)
 const tiles = ref([])
 const currentTile = ref(null)
 const firstTile = ref(null)
@@ -51,6 +53,11 @@ const startGame = () => {
   }
 }
 
+const switchData = (type) => {
+  data.value = type === 'renaissance' ? renaissanceData : spaceData
+  startGame()
+}
+
 const onDiceRolled = (value) => {
   stepsRemaining.value = value
   stepsAll.value += value
@@ -69,7 +76,7 @@ const tileSize = computed(() => {
 })
 
 const drawBoard = () => {
-  const totalTiles = data.tiles.length
+  const totalTiles = data.value.tiles.length
   const size = Math.sqrt(totalTiles)
 
   if (!Number.isInteger(size)) {
@@ -82,7 +89,7 @@ const drawBoard = () => {
   const tempList = []
 
   for (let id = 0; id < totalTiles; id++) {
-    const tileData = data.tiles[id]
+    const tileData = data.value.tiles[id]
 
     tempList.push({
       id,
@@ -299,7 +306,12 @@ const handleAnswer = (confirm, tile) => {
   </main>
 
   <footer>
-    <button @click="startGame">Hrať znovu</button>
+    <div class="btn-conatiner">
+      <button @click="switchData('renaissance')">🖼️</button>
+      <button @click="switchData('space')">☀️</button>
+
+      <button class="reset-btn" @click="startGame">Hrať znovu</button>
+    </div>
 
     <div class="hint">{{ hint }}</div>
   </footer>
@@ -339,14 +351,32 @@ h2 {
   background-size: cover;
 }
 
+.btn-conatiner {
+  display: flex;
+}
+
 button {
+  border: none;
+  margin: 0.3rem;
+  padding: 0;
+  width: auto;
+  overflow: visible;
+  cursor: pointer;
+
+  background: transparent;
+
+  font-size: 1.8rem;
+}
+
+.reset-btn {
+  font-size: inherit;
   background: #ffaaac;
   color: #000;
+  margin: auto 0 auto 0.7rem;
   padding-right: 10px;
   padding-left: 10px;
   min-height: 28px;
   font-weight: 700;
-  cursor: pointer;
   border-radius: 5px;
   border: none;
   /* align-self: start; */
